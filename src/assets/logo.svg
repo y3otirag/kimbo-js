@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Kimbo JS">
+  <rect x="1" y="1" width="126" height="126" rx="20" fill="#0a100b" stroke="#314535" stroke-width="2"/>
+  <rect x="10" y="10" width="108" height="108" rx="14" fill="none" stroke="#1c2b20" stroke-width="2"/>
+  <path d="M36 26v76M36 66l52-40M36 66l55 38" fill="none" stroke="#c8ff3d" stroke-width="15" stroke-linecap="square"/>
+  <circle cx="98" cy="28" r="9" fill="#ff7043"/>
+</svg>

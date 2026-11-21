@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="current-org-id" content="482" />
+    <title>Acme Reports — SSR fixture</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, sans-serif; background:#0d130e; color:#e8f0e4; padding:32px; }
+      a { color:#c8ff3d; }
+      form { border:1px solid #2a3a2d; padding:12px; max-width:420px; margin:16px 0; background:#111a13; }
+      input, button { display:block; margin:6px 0; padding:6px; }
+      code { background:#142016; padding:1px 5px; }
+    </style>
+  </head>
+  <body>
+    <h1>Acme Reports</h1>
+    <p>Server-rendered fixture. Some links and forms are API-shaped on purpose.</p>
+    <ul>
+      <li><a href="/api/v1/orgs/482/reports/ssr-1">Report SSR-1</a></li>
+      <li><a href="/api/v1/orgs/482/members/17">Member 17</a></li>
+      <li><a href="/about">About page</a></li>
+      <li><a href="/assets/app.css">Static stylesheet</a></li>
+    </ul>
+    <form action="/api/v1/orgs/482/export" method="post">
+      <label>Organization <input name="org_id" value="482" /></label>
+      <input type="hidden" name="csrf_token" value="FIXTURE_CSRF_SECRET" />
+      <input type="password" name="password" value="FIXTURE_PASSWORD" />
+      <button type="submit">Export</button>
+    </form>
+    <div
+      id="report-panel"
+      data-user-id="91"
+      data-org-id="482"
+      data-api-url="/api/v1/users/91/profile"
+    >
+      Rendered on the server.
+    </div>
+    <script>
+      (function () {
+        const b64url = (obj) =>
+          btoa(JSON.stringify(obj)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+        const jwt =
+          b64url({ alg: 'none', typ: 'JWT' }) +
+          '.' +
+          b64url({ sub: 'ssr-user-91', org_id: 482, tenant_id: 'acme' }) +
+          '.fixture-signature';
+        localStorage.setItem('current_org_id', '482');
+        localStorage.setItem('current_user_id', '91');
+        const headers = { Authorization: 'Bearer ' + jwt, Accept: 'application/json' };
+        const orgId = 482;
+        const userId = 91;
+        const templateRoute = `/api/v1/orgs/${orgId}/members/${userId}`;
+        window.__ssrFixture = { jwt: jwt, templateRoute: templateRoute };
+        setTimeout(function () {
+          fetch('/api/v1/orgs/482/ssr/99', { headers: headers }).catch(function () {});
+          try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/v1/orgs/482/ssr/actions');
+            xhr.setRequestHeader('Authorization', 'Bearer ' + jwt);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ org_id: 482, user_id: 91 }));
+          } catch (_) {
+            /* ignore */
+          }
+        }, 120);
+      })();
+    </script>
+  </body>
+</html>

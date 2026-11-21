@@ -1,0 +1,14 @@
+{
+  "name": "kimbo-js",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Passive API cartographer for authorized pentests. Maps observed endpoints, anchors object IDs, and never calls discovered APIs.",
+  "license": "MIT",
+  "scripts": {
+    "test": "python3 -I test/run_tests.py",
+    "test:core": "python3 -I test/run_tests.py --skip-e2e",
+    "test:e2e": "python3 -I test/e2e/smoke.py",
+    "fixtures": "python3 -I test/fixtures/server.py --port 0",
+    "icons": "python3 -I tools/make_icons.py"
+  }
+}

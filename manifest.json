@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Kimbo JS",
+  "short_name": "Kimbo",
+  "version": "0.1.0",
+  "description": "Passive API cartographer for authorized pentests. Maps observed endpoints, anchors object IDs, and never calls discovered APIs.",
+  "minimum_chrome_version": "111",
+  "incognito": "not_allowed",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab",
+    "webNavigation"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "action": {
+    "default_title": "Kimbo JS — passive API map",
+    "default_popup": "src/ui/popup.html",
+    "default_icon": {
+      "16": "src/assets/icons/icon16.png",
+      "32": "src/assets/icons/icon32.png",
+      "48": "src/assets/icons/icon48.png",
+      "128": "src/assets/icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "src/assets/icons/icon16.png",
+    "32": "src/assets/icons/icon32.png",
+    "48": "src/assets/icons/icon48.png",
+    "128": "src/assets/icons/icon128.png"
+  },
+  "devtools_page": "src/devtools/devtools.html",
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+K"
+      },
+      "description": "Open Kimbo JS"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'; form-action 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+  }
+}

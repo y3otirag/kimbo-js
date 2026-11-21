@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Acme Console — React SPA fixture</title>
+    <style>
+      body { margin:0; font-family: ui-sans-serif, system-ui, sans-serif; background:#0d130e; color:#e8f0e4; }
+      main { max-width: 780px; margin: 0 auto; padding: 32px; }
+      h1 { letter-spacing:-0.03em; }
+      .card { border:1px solid #2a3a2d; padding:10px; margin:6px 0; background:#111a13; font-family:ui-monospace, monospace; font-size:12px; }
+      .muted { color:#8fa292; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="/vendor/react.production.min.js"></script>
+    <script src="/vendor/react-dom.production.min.js"></script>
+    <script>
+      (function () {
+        'use strict';
+        const e = React.createElement;
+        const b64url = (obj) =>
+          btoa(JSON.stringify(obj)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+        const jwt =
+          b64url({ alg: 'none', typ: 'JWT' }) +
+          '.' +
+          b64url({
+            sub: 'user-91',
+            org_id: 482,
+            tenant_id: 'acme',
+            email: 'tester@example.test',
+            exp: 4102444800
+          }) +
+          '.fixture-signature';
+        window.__testJwt = jwt;
+        window.__kimboFixture = { jwt: jwt, requests: 0, chunkLoaded: false };
+
+        localStorage.setItem('current_org_id', '482');
+        localStorage.setItem('current_user_id', '91');
+        localStorage.setItem('project_id', '91');
+        localStorage.setItem('member_id', '17');
+        localStorage.setItem('tenant_id', 'acme');
+        sessionStorage.setItem('current_project_id', '91');
+
+        const headers = {
+          Authorization: 'Bearer ' + jwt,
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        };
+
+        function call(url, init) {
+          window.__kimboFixture.requests++;
+          return fetch(url, init).catch(() => null);
+        }
+
+        function App() {
+          const [routes, setRoutes] = React.useState([]);
+          React.useEffect(function () {
+            const timers = [];
+            const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+
+            later(120, function () {
+              call('/api/v1/orgs/482/projects/91/members?role=admin', { headers: headers });
+            });
+
+            later(240, function () {
+              try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', '/api/v1/users/91/profile');
+                xhr.setRequestHeader('Authorization', 'Bearer ' + jwt);
+                xhr.onloadend = function () {
+                  window.__kimboFixture.xhrStatus = xhr.status;
+                };
+                xhr.send();
+              } catch (_) {
+                /* ignore */
+              }
+            });
+
+            later(360, function () {
+              call('/api/v1/orgs/482/projects/91', {
+                method: 'PATCH',
+                headers: headers,
+                body: JSON.stringify({ name: 'Renamed project', org_id: 482 })
+              });
+            });
+
+            later(480, function () {
+              call('/api/v1/orgs/482/members/17', { method: 'DELETE', headers: headers });
+            });
+
+            later(600, function () {
+              call('/api/v1/orgs/482/invites', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ user_id: 91, role: 'admin' })
+              });
+            });
+
+            later(720, function () {
+              call('/api/v1/orgs/482/billing/invoices/INV-2026-0042', { headers: headers });
+            });
+
+            later(840, function () {
+              call('/graphql', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ query: '{ viewer { id orgId } }' })
+              });
+            });
+
+            later(960, function () {
+              import('/assets/chunk-a.js')
+                .then(function (mod) {
+                  window.__kimboFixture.chunkLoaded = true;
+                  setRoutes(Array.isArray(mod.routes) ? mod.routes : []);
+                })
+                .catch(function () {});
+            });
+
+            later(1080, function () {
+              try {
+                history.pushState({ route: 'project' }, '', '/app/projects/91');
+              } catch (_) {
+                /* ignore */
+              }
+            });
+
+            later(1200, function () {
+              const panel = document.createElement('div');
+              panel.id = 'spa-panel';
+              panel.setAttribute('data-org-id', '482');
+              panel.setAttribute('data-user-id', '91');
+              panel.setAttribute('data-api-endpoint', '/api/v1/orgs/482/billing');
+              panel.textContent = 'Project panel';
+              document.body.appendChild(panel);
+
+              const form = document.createElement('form');
+              form.action = '/api/v1/orgs/482/export';
+              form.method = 'post';
+              form.innerHTML =
+                '<input name="org_id" value="482">' +
+                '<input type="hidden" name="csrf_token" value="FIXTURE_CSRF_SECRET">' +
+                '<input type="password" name="password" value="FIXTURE_PASSWORD">';
+              document.body.appendChild(form);
+
+              const host = document.createElement('div');
+              host.id = 'shadow-host';
+              const shadow = host.attachShadow({ mode: 'open' });
+              const anchor = document.createElement('a');
+              anchor.href = '/api/v1/orgs/482/shadow/7';
+              anchor.textContent = 'shadow route';
+              shadow.appendChild(anchor);
+              document.body.appendChild(host);
+
+              const inline = document.createElement('script');
+              inline.textContent =
+                'const fixtureRoutes = ["/api/v1/orgs/482/reports/77", "/api/v1/feature-flags", "/assets/app.css"];';
+              document.body.appendChild(inline);
+
+              const stylesheet = document.createElement('link');
+              stylesheet.rel = 'stylesheet';
+              stylesheet.href = '/assets/app.css';
+              document.head.appendChild(stylesheet);
+
+              window.__kimboFixture.domReady = true;
+            });
+
+            return function () {
+              timers.forEach(clearTimeout);
+            };
+          }, []);
+
+          return e(
+            'main',
+            null,
+            e('h1', null, 'Acme Console'),
+            e(
+              'p',
+              { className: 'muted' },
+              'React SPA fixture. Effects make real fetch/XHR calls and load a dynamic chunk.'
+            ),
+            e('div', { className: 'card' }, 'Organization 482 · Project 91 · Member 17'),
+            e(
+              'div',
+              { className: 'card' },
+              'Dynamic chunk routes: ' + (routes.length ? routes.join(' · ') : 'loading…')
+            )
+          );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Logs and local test artifacts
+*.log
+/vendor/
+!test/fixtures/vendor/
+
+# Local environment
+.env
+.env.*
